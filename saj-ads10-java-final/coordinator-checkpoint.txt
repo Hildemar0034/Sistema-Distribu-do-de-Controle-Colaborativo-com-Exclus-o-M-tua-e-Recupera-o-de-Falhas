@@ -1,0 +1,3 @@
+3
+3
+Node 1 incrementou contador (v1)|Node 2 incrementou contador (v2)|Node 3 incrementou contador (v3)

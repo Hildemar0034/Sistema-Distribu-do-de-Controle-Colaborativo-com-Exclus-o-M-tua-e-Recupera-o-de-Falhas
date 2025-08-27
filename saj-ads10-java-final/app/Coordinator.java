@@ -16,6 +16,10 @@ public class Coordinator {
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("--port")) port = Integer.parseInt(args[i+1]);
         }
+
+        // Recuperar estado salvo (rollback)
+        loadCheckpoint();
+
         ServerSocket server = new ServerSocket(port);
         System.out.println("Coordinator rodando na porta " + port);
         while (true) {
@@ -38,10 +42,16 @@ public class Coordinator {
                     version++;
                     String entry = "Node " + nodeId + " incrementou contador (v" + version + ")";
                     log.add(entry);
+
                     broadcast("UPDATE " + version + " " + entry);
                     out.println("REPLY " + version);
+
+                    // Salvar checkpoint após cada REQUEST
+                    saveCheckpoint();
+
                 } else if (line.startsWith("SNAPSHOT")) {
                     sendSnapshotToAll();
+                    saveCheckpoint();
                 }
             }
         } catch (Exception e) {
@@ -62,5 +72,32 @@ public class Coordinator {
         String msg = "SNAPSHOT " + version + " " + payload;
         broadcast(msg);
         System.out.println("Snapshot enviado para todos os nós. Versão " + version);
+    }
+
+    // ---- Checkpoint ----
+    private static void saveCheckpoint() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("coordinator-checkpoint.txt"))) {
+            writer.println(version);
+            writer.println(lamport);
+            writer.println(String.join("|", log));
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar checkpoint do coordenador: " + e.getMessage());
+        }
+    }
+
+    private static void loadCheckpoint() {
+        File f = new File("coordinator-checkpoint.txt");
+        if (!f.exists()) return;
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+            version = Integer.parseInt(br.readLine());
+            lamport = Integer.parseInt(br.readLine());
+            String line = br.readLine();
+            if (line != null && !line.isEmpty()) {
+                log = new ArrayList<>(Arrays.asList(line.split("\\|")));
+            }
+            System.out.println("Coordenador restaurado do checkpoint v" + version + " (Lamport=" + lamport + ")");
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar checkpoint do coordenador: " + e.getMessage());
+        }
     }
 }
