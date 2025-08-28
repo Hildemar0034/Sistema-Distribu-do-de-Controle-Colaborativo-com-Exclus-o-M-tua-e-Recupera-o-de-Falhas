@@ -36,3 +36,6 @@ Para executar o projeto, siga as instruções abaixo:
     * **status:** Exibe o estado atual do nó, mostrando todas as operações executadas, por exemplo: "Node 2 v1 log=[Node x incrementou]".
     * **snapshot:** Sincroniza o nó com o último *checkpoint*.
     * **quit:** Encerra a execução do nó atual.
+
+### **Observação**
+* **Projeto:**  O projeto so vai rodar quando voce abrir no VsCode a pasta (saj-ads10-java-final) que está dentro dessa pasta do zip (Sistema-Distribu-do-de-Controle-Colaborativo-com-Exclus-o-M-tua-e-Recupera-o-de-Falhas-main)
